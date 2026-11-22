@@ -45,7 +45,6 @@ public class RefreshGameServer : RefreshServer
     protected readonly GameDatabaseProvider _databaseProvider;
     protected readonly IDataStore _dataStore;
     protected readonly ConfigStore _configStore;
-    protected readonly RemoteArchiveSettings _remoteArchiveSettings;
 
     public RefreshGameServer(
         BunkumHttpListener? listener = null,
@@ -64,7 +63,6 @@ public class RefreshGameServer : RefreshServer
                 storage.Enabled ? "Primary asset storage: S3." : "Primary asset storage: local filesystem.");
         }
         List<IDataStore> dataStores = [];
-        this._remoteArchiveSettings = RemoteArchiveSettings.FromEnvironment();
 
         try
         {
@@ -82,10 +80,6 @@ public class RefreshGameServer : RefreshServer
         
         if (this._configStore.DryArchive.Enabled)
             dataStores.Add(new DownloadingDataStore(dataStore, new DryDataStore(this._configStore.DryArchive)));
-
-        if (this._remoteArchiveSettings.Enabled)
-            dataStores.Add(new DownloadingDataStore(dataStore,
-                new RemoteArchiveDataStore(this._remoteArchiveSettings.BaseUrl), hitsBeforeDownload: 1));
 
         databaseProvider ??= () => new GameDatabaseProvider(this.Logger, this._configStore.Database);
         
@@ -170,8 +164,6 @@ public class RefreshGameServer : RefreshServer
         this.Server.AddService<TimeProviderService>(this.GetTimeProvider());
         this.Server.AddService<GameRateLimitService>();
         this.Server.AddService<CategoryService>();
-        if (this._remoteArchiveSettings.Enabled)
-            this.Server.AddService<RemoteArchiveSearchService>(this._remoteArchiveSettings.SearchApiUrl);
         this.Server.AddService(new MatchService(this.Server.Logger, this._configStore.GameServer));
         this.Server.AddService<ImportService>();
         this.Server.AddService<DocumentationService>();
