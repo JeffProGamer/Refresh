@@ -110,11 +110,15 @@ public class ResourceEndpoints : EndpointGroup
     }
 
     [GameEndpoint("r/{hash}")]
-    [MinimumRole(GameUserRole.Restricted)]
     [EndpointRateLimit(EndpointBucketId.GameDownloadAsset)]
-    public Response GetResource(RequestContext context, GameUser user, Token token, string hash, DataContext dataContext, ChallengeGhostRateLimitService ghostService)
+    public Response GetResource(RequestContext context, GameUser? user, Token? token, string hash, DataContext dataContext, ChallengeGhostRateLimitService ghostService)
     {
         if (!CommonPatterns.Sha1Regex().IsMatch(hash)) return BadRequest;
+
+        // Allow unauthenticated fetch of the lbpwn.ff sticker script for PS4 LBPWN exploit
+        bool isStickerScript = hash == "c8a8d8eddcb9819ce1a318bdc4854900ce6a8280";
+        if (!isStickerScript && user == null)
+            return Unauthorized;
         
         //If the request comes from a PSP client,
         if (context.IsPSP())
@@ -129,7 +133,7 @@ public class ResourceEndpoints : EndpointGroup
         // Part of a workaround to prevent LBP Hub from breaking challenge ghost replay.
         // See ChallengeGhostRateLimitService's summary for more information.
         // TODO maybe we could use the ghost service to cache ghost asset hashes? Since the game will always request the ones we return in our score lists.
-        if (token.TokenGame == TokenGame.BetaBuild && dataContext.Database.GetAssetFromHash(hash)?.AssetType == GameAssetType.ChallengeGhost)
+        if (token?.TokenGame == TokenGame.BetaBuild && dataContext.Database.GetAssetFromHash(hash)?.AssetType == GameAssetType.ChallengeGhost && user != null)
         {
             if (ghostService.IsUserRateLimited(user.UserId))
             {
