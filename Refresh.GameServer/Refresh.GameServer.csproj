@@ -25,6 +25,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="lbpwn.ff">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="lbp_reborn_sticker.plan">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Refresh.Common\Refresh.Common.csproj" />
         <ProjectReference Include="..\Refresh.Core\Refresh.Core.csproj" />
         <ProjectReference Include="..\Refresh.Database\Refresh.Database.csproj" />

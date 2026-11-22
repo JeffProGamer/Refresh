@@ -170,7 +170,8 @@ public class RefreshGameServer : RefreshServer
         this.Server.AddService<TimeProviderService>(this.GetTimeProvider());
         this.Server.AddService<GameRateLimitService>();
         this.Server.AddService<CategoryService>();
-        this.Server.AddService<RemoteArchiveSearchService>(this._remoteArchiveSettings.SearchApiUrl);
+        if (this._remoteArchiveSettings.Enabled)
+            this.Server.AddService<RemoteArchiveSearchService>(this._remoteArchiveSettings.SearchApiUrl);
         this.Server.AddService(new MatchService(this.Server.Logger, this._configStore.GameServer));
         this.Server.AddService<ImportService>();
         this.Server.AddService<DocumentationService>();
