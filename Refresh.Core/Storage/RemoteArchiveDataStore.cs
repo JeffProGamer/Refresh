@@ -28,7 +28,10 @@ public sealed class RemoteArchiveDataStore : IDataStore
         if (!CommonPatterns.Sha1Regex().IsMatch(hash))
             return null;
 
-        return new Uri(this._baseUri, $"{hash}.bin");
+        string extension = this._baseUri.AbsolutePath.EndsWith("/assets/", StringComparison.Ordinal)
+            ? ""
+            : ".bin";
+        return new Uri(this._baseUri, $"{hash}{extension}");
     }
 
     public bool ExistsInStore(string key)

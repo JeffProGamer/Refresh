@@ -5,10 +5,12 @@ using Refresh.Common;
 using Refresh.Core.Authentication.Permission;
 using Refresh.Core.Configuration;
 using Refresh.Core.RateLimits.EndpointRateLimiting;
+using Refresh.Core.Services;
 using Refresh.Core.Types.Categories;
 using Refresh.Core.Types.Categories.Levels;
 using Refresh.Core.Types.Data;
 using Refresh.Database;
+using Refresh.Database.Extensions;
 using Refresh.Database.Models.Authentication;
 using Refresh.Database.Models.Levels;
 using Refresh.Database.Models.Users;
@@ -59,15 +61,70 @@ public class CategoryEndpoints : EndpointGroup
     [MinimumRole(GameUserRole.Restricted)]
     [EndpointRateLimit(EndpointBucketId.GameGetListOfLevels)]
     public SerializedCategoryResultsList? GetLevelsFromCategory(RequestContext context, CategoryService categories, GameUser user, 
-        string apiRoute, DataContext dataContext)
+        string apiRoute, DataContext dataContext, RemoteArchiveSearchService remoteArchiveSearch)
     {
         (int skip, int count) = context.GetPageData();
+        LevelFilterSettings filters = LevelFilterSettings.FromGameRequest(context, dataContext.Game, true);
 
         DatabaseResultList? results = categories.LevelCategories
             .FirstOrDefault(c => c.ApiRoute.StartsWith(apiRoute))?
-            .Fetch(context, skip, count, dataContext, LevelFilterSettings.FromGameRequest(context, dataContext.Game, true), user);
+            .Fetch(context, skip, count, dataContext, filters, user);
         
         if (results == null) return null;
+
+        int localLevelCount = results.Levels?.Items.Count() ?? 0;
+        if (string.Equals(apiRoute, "search", StringComparison.OrdinalIgnoreCase) &&
+            results.Levels != null && localLevelCount < count && count > 0)
+        {
+            string? query = context.QueryString["query"] ?? context.QueryString["textFilter"];
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                try
+                {
+                    int remoteCount = Math.Min(100, count + localLevelCount);
+                    RemoteArchiveSearchPage? remotePage = remoteArchiveSearch.Search(query, skip, remoteCount, filters);
+                    if (remotePage != null)
+                    {
+                        List<GameLevel> levels = results.Levels.Items.ToList();
+                        HashSet<string> hashes = levels.Select(level => level.RootResource).ToHashSet(StringComparer.Ordinal);
+
+                        foreach (RemoteArchiveSearchLevel remoteLevel in remotePage.Data ?? [])
+                        {
+                            GameLevel? candidate = remoteLevel.ToGameLevel();
+                            if (candidate == null ||
+                                !filters.GameVersion.CanPlay(candidate) ||
+                                !new[] { candidate }.FilterByLevelFilterSettings(user, filters).Any())
+                            {
+                                continue;
+                            }
+
+                            GameLevel imported = dataContext.Database.AddArchivedLevel(candidate);
+                            if (hashes.Add(imported.RootResource))
+                                levels.Add(imported);
+
+                            if (levels.Count >= count) break;
+                        }
+
+                        if (levels.Count > localLevelCount)
+                        {
+                            int nextPage = Math.Max(results.NextPageIndexMax, remotePage.ListInfo?.NextPageIndex ?? 0);
+                            int total = Math.Max(results.TotalItemsSum, remotePage.ListInfo?.TotalItems ?? 0);
+                            return new SerializedCategoryResultsList(
+                                GameMinimalLevelResponse.FromOldList(levels, dataContext),
+                                GameUserResponse.FromOldList(results.Users?.Items.ToArray() ?? [], dataContext),
+                                nextPage,
+                                total);
+                        }
+                    }
+                }
+                catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
+                                                   System.Text.Json.JsonException or InvalidDataException)
+                {
+                    context.Logger.LogWarning(RefreshContext.Database,
+                        $"Remote archive search failed; returning local search results. {exception.Message}");
+                }
+            }
+        }
         
         return new SerializedCategoryResultsList
         (

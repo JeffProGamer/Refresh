@@ -97,6 +97,14 @@ public class AuthenticationEndpoints : EndpointGroup
                     // if smtp isn't enabled just mark the user's email as verified
                     database.VerifyUserEmail(user);
                 }
+
+                if (!string.IsNullOrWhiteSpace(config.WelcomeNotificationText))
+                {
+                    string title = string.IsNullOrWhiteSpace(config.WelcomeNotificationTitle)
+                        ? $"Welcome to {config.InstanceName}"
+                        : config.WelcomeNotificationTitle;
+                    database.AddNotification(title, config.WelcomeNotificationText, user, "hand-sparkles");
+                }
             }
             else
             {
@@ -244,37 +252,46 @@ public class AuthenticationEndpoints : EndpointGroup
         };
     }
 
-    private static bool VerifyTicket(RequestContext context, MemoryStream body, Ticket ticket, TokenPlatform platform, IDateTimeProvider timeProvider)
+private static bool VerifyTicket(RequestContext context, MemoryStream body, Ticket ticket, TokenPlatform platform, IDateTimeProvider timeProvider)
+{
+    ITicketSigningKey signingKey;
+
+    switch (platform)
     {
-        ITicketSigningKey signingKey;
+        // Determine the correct key to use
+        case TokenPlatform.RPCS3:
+            context.Logger.LogDebug(BunkumCategory.Authentication, "Using RPCN ticket key");
+            signingKey = RpcnSigningKey.Instance;
+            break;
+        case TokenPlatform.PS3:
+        case TokenPlatform.Vita:
+        case TokenPlatform.PSP:
+            context.Logger.LogDebug(BunkumCategory.Authentication, "Using PSN LBP ticket key");
+            signingKey = LbpSigningKey.Instance;
+            break;
+        case TokenPlatform.PS4:
+            if (!string.Equals(Environment.GetEnvironmentVariable("Auth__EnablePs4Support"), "true", StringComparison.OrdinalIgnoreCase))
+                return false;
 
-        switch (platform)
-        {
-            // Determine the correct key to use
-            case TokenPlatform.RPCS3:
-                context.Logger.LogDebug(BunkumCategory.Authentication, "Using RPCN ticket key");
-                signingKey = RpcnSigningKey.Instance;
-                break;
-            case TokenPlatform.PS3:
-            case TokenPlatform.Vita:
-            case TokenPlatform.PSP:
-                context.Logger.LogDebug(BunkumCategory.Authentication, "Using PSN LBP ticket key");
-                signingKey = LbpSigningKey.Instance;
-                break;
-            case TokenPlatform.Website:
-            default:
-                throw new ArgumentOutOfRangeException(nameof(platform));
-        }
+            if (timeProvider.Now > ticket.ExpiryDate)
+                return false;
 
-        // Dont allow use of expired tickets
-        if (timeProvider.Now > ticket.ExpiryDate)
-            return false;
-            
-        // Pass this information into a new ticket verifier
-        // TODO: make this into a service?
-        TicketVerifier verifier = new(body.ToArray(), ticket, signingKey);
-        return verifier.IsTicketValid();
+            return !string.IsNullOrWhiteSpace(ticket.Username);
+        case TokenPlatform.Website:
+        default:
+            throw new ArgumentOutOfRangeException(nameof(platform));
     }
+
+    // Dont allow use of expired tickets
+    if (timeProvider.Now > ticket.ExpiryDate)
+        return false;
+        
+    // Pass this information into a new ticket verifier
+    // TODO: make this into a service?
+    TicketVerifier verifier = new(body.ToArray(), ticket, signingKey);
+    return verifier.IsTicketValid();
+}
+
 
     private static bool HandleIpAuthentication(RequestContext context, GameUser user, GameDatabaseContext database, bool notify)
     {

@@ -12,6 +12,7 @@ using Refresh.Database.Models.Levels;
 using Refresh.Database.Models.Photos;
 using Refresh.Database.Models.Relations;
 using Refresh.Database.Models.Statistics;
+using Refresh.Common.Verification;
 
 namespace Refresh.Database;
 
@@ -77,6 +78,35 @@ public partial class GameDatabaseContext // Levels
         level.Publisher = publisher;
         this.Entry(level.Publisher).State = EntityState.Unchanged;
         return level;
+    }
+
+    public GameLevel AddArchivedLevel(GameLevel archivedLevel)
+    {
+        if (!CommonPatterns.Sha1Regex().IsMatch(archivedLevel.RootResource))
+            throw new ArgumentException("The archived level root resource must be a SHA-1 hash.", nameof(archivedLevel));
+
+        GameLevel? existing = this.GetLevelByRootResource(archivedLevel.RootResource);
+        if (existing != null) return existing;
+
+        int levelId = GameLevel.LevelIdFromHash(archivedLevel.RootResource);
+        GameLevel? collision = this.GameLevels.FirstOrDefault(level => level.LevelId == levelId);
+        if (collision != null)
+        {
+            if (collision.RootResource == archivedLevel.RootResource) return collision;
+            throw new InvalidOperationException($"Archived level ID collision for root resource '{archivedLevel.RootResource}'.");
+        }
+
+        archivedLevel.LevelId = levelId;
+        archivedLevel.Publisher = null;
+        archivedLevel.PublisherUserId = null;
+        archivedLevel.StoryId = 0;
+        archivedLevel.Statistics ??= new GameLevelStatistics();
+        archivedLevel.Statistics.LevelId = levelId;
+
+        this.GameLevels.Add(archivedLevel);
+        this.GameLevelStatistics.Add(archivedLevel.Statistics);
+        this.SaveChanges();
+        return archivedLevel;
     }
 
     public GameLevel GetStoryLevelById(int id)

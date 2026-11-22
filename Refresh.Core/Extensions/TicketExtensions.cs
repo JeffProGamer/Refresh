@@ -12,6 +12,9 @@ public static class TicketExtensions
         if (ticket.SignatureIdentifier == "RPCN" || ticket.IssuerId == 0x33333333)
             return TokenPlatform.RPCS3;
 
+        if (!string.IsNullOrEmpty(ticket.TitleId) && ticket.TitleId.StartsWith("CUSA", StringComparison.OrdinalIgnoreCase))
+            return TokenPlatform.PS4;
+
         if (ticket.IssuerId == 0x100)
             return TokenPlatform.PS3;
 

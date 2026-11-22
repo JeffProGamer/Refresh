@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using Bunkum.Core;
+using Bunkum.Core.Configuration;
 using Bunkum.Protocols.Http;
 using NotEnoughLogs;
 using NotEnoughLogs.Behaviour;
@@ -21,7 +22,7 @@ public abstract class RefreshServer : IDisposable
         // ReSharper disable once VirtualMemberCallInConstructor
         (LoggerConfiguration logConfig, List<ILoggerSink>? sinks) = this.GetLoggerConfiguration();
         
-        this.Server = new BunkumHttpServer(logConfig, sinks);
+        this.Server = new RefreshBunkumHttpServer(logConfig, sinks);
         if(listener != null) this.Server.UseListener(listener);
         
         this.Logger.LogDebug(BunkumCategory.Startup, $"Initializing {nameof(RefreshServer)} of type {this.GetType().Name}");
@@ -67,6 +68,20 @@ public abstract class RefreshServer : IDisposable
     protected abstract void SetupServices();
     protected abstract void SetupMiddlewares();
     protected abstract void SetupConfiguration();
+
+    private sealed class RefreshBunkumHttpServer(LoggerConfiguration? configuration, List<ILoggerSink>? sinks)
+        : BunkumHttpServer(configuration, sinks)
+    {
+        protected override BunkumConfig CreateConfig(string filename)
+        {
+            BunkumConfig config = base.CreateConfig(filename);
+            string? publicUrl = Environment.GetEnvironmentVariable("Server__PublicUrl");
+            if (!string.IsNullOrWhiteSpace(publicUrl))
+                config.ExternalUrl = publicUrl;
+
+            return config;
+        }
+    }
     
     protected virtual (LoggerConfiguration logConfig, List<ILoggerSink>? sinks) GetLoggerConfiguration()
     {

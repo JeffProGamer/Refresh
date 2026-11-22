@@ -381,6 +381,14 @@ public class AuthenticationApiEndpoints : EndpointGroup
             // if smtp isn't enabled just mark the user's email as verified
             database.VerifyUserEmail(user);
         }
+
+        if (!string.IsNullOrWhiteSpace(config.WelcomeNotificationText))
+        {
+            string title = string.IsNullOrWhiteSpace(config.WelcomeNotificationTitle)
+                ? $"Welcome to {config.InstanceName}"
+                : config.WelcomeNotificationTitle;
+            database.AddNotification(title, config.WelcomeNotificationText, user, "hand-sparkles");
+        }
         
         Token token = database.GenerateTokenForUser(user, TokenType.Api, TokenGame.Website, TokenPlatform.Website, context.RemoteIp());
 

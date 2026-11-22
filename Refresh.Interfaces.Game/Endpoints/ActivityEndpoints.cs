@@ -171,17 +171,47 @@ public class ActivityEndpoints : EndpointGroup
     [Authentication(false)]
     [MinimumRole(GameUserRole.Restricted)]
     [EndpointRateLimit(EndpointBucketId.GameGetActivityPage)] // basically the same
-    public Response GetNews(RequestContext context, GameDatabaseContext database, IDateTimeProvider time, Token? token)
+    public Response GetNews(RequestContext context, GameDatabaseContext database, IDateTimeProvider time, Token? token,
+        GameServerConfig config)
     {
         List<GameNewsItem> items = new();
 
         XmlSerializer itemContentSerializer = new(typeof(GameNewsItemContent));
 
+        int i = 0;
+        if (!string.IsNullOrWhiteSpace(config.PodNewsText))
+        {
+            XmlDocument doc = new();
+            using (XmlWriter writer = doc.CreateNavigator()!.AppendChild())
+            {
+                itemContentSerializer.Serialize(writer, new GameNewsItemContent
+                {
+                    Frame = new GameNewsFrame
+                    {
+                        Width = 100,
+                        Title = string.IsNullOrWhiteSpace(config.PodNewsTitle) ? config.InstanceName : config.PodNewsTitle,
+                        Item = new GameNewsFrameItem
+                        {
+                            Width = 100,
+                            Content = config.PodNewsText,
+                            Background = "Frame item background",
+                        },
+                    },
+                });
+            }
+
+            items.Add(new GameNewsItem
+            {
+                Id = i++,
+                Subject = string.IsNullOrWhiteSpace(config.PodNewsTitle) ? config.InstanceName : config.PodNewsTitle,
+                Content = doc.DocumentElement!.InnerXml,
+                Timestamp = time.TimestampSeconds,
+            });
+        }
+
         if (token != null)
         {
             IEnumerable<GameLevel> teamPicks = database.GetTeamPickedLevels(32, 0, null, new(token.TokenGame)).Items;
-            
-            int i = 0;
             foreach (GameLevel level in teamPicks)
             {
                 XmlDocument doc = new();

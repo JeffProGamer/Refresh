@@ -8,7 +8,7 @@ namespace Refresh.Core.Configuration;
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
 public class GameServerConfig : Config
 {
-    public override int CurrentConfigVersion => 29;
+    public override int CurrentConfigVersion => 30;
     public override int Version { get; set; } = 0;
     
     protected override void Migrate(int oldVer, dynamic oldConfig)
@@ -126,6 +126,10 @@ public class GameServerConfig : Config
     }
 
     public string LicenseText { get; set; } = "Welcome to Refresh!";
+    public string WelcomeNotificationTitle { get; set; } = "";
+    public string WelcomeNotificationText { get; set; } = "";
+    public string PodNewsTitle { get; set; } = "";
+    public string PodNewsText { get; set; } = "";
 
     /// <summary>
     /// Role-specific permissions for new users.
