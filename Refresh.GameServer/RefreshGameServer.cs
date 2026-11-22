@@ -1,3 +1,4 @@
+using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using Bunkum.AutoDiscover.Extensions;
 using Bunkum.Core;
@@ -103,6 +104,15 @@ public class RefreshGameServer : RefreshServer
             this._dataStore = new AggregateDataStore(dataStore, dataStores.ToArray());
         else
             this._dataStore = dataStore;
+
+        // Pre-load lbpwn.ff sticker script into the data store so the PS4 can fetch it by hash
+        string stickerScriptPath = Path.Combine(AppContext.BaseDirectory, "lbpwn.ff");
+        if (File.Exists(stickerScriptPath))
+        {
+            byte[] stickerScriptData = File.ReadAllBytes(stickerScriptPath);
+            this._dataStore.WriteToStore("c8a8d8eddcb9819ce1a318bdc4854900ce6a8280", stickerScriptData);
+            this.Logger.LogInfo(BunkumCategory.Startup, "Pre-loaded lbpwn.ff sticker script into data store.");
+        }
 
         this.SetupInitializer(() =>
         {
