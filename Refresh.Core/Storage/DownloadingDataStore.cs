@@ -9,28 +9,24 @@ public class DownloadingDataStore : IDataStore
     private readonly IDataStore _remoteDataStore;
     private readonly ConcurrentDictionary<string, int> _hits = [];
 
-    private const int HitsBeforeDownload = 3;
+    private readonly int _hitsBeforeDownload;
     
     private const string WriteError = $"{nameof(DownloadingDataStore)} is a read-only source, and cannot be written to.";
 
-    public DownloadingDataStore(IDataStore localDataStore, IDataStore remoteDataStore)
+    public DownloadingDataStore(IDataStore localDataStore, IDataStore remoteDataStore, int hitsBeforeDownload = 3)
     {
+        if (hitsBeforeDownload < 1)
+            throw new ArgumentOutOfRangeException(nameof(hitsBeforeDownload), "The cache threshold must be at least one.");
+
         this._localDataStore = localDataStore;
         this._remoteDataStore = remoteDataStore;
+        this._hitsBeforeDownload = hitsBeforeDownload;
     }
 
     private bool Hit(string key)
     {
-        if (!this._hits.TryGetValue(key, out int value) && this._remoteDataStore.ExistsInStore(key))
-        {
-            _hits[key] = 1;
-            return false;
-        }
-
-        value++;
-        _hits[key] = value;
-
-        return value >= HitsBeforeDownload;
+        int value = this._hits.AddOrUpdate(key, 1, (_, current) => current + 1);
+        return value >= this._hitsBeforeDownload;
     }
 
     
@@ -53,7 +49,8 @@ public class DownloadingDataStore : IDataStore
         if (this.Hit(key))
         {
             this._hits.Remove(key, out _);
-            this._localDataStore.WriteToStore(key, data);
+            if (!this._localDataStore.WriteToStore(key, data))
+                throw new IOException($"Could not cache remote asset '{key}' in the primary data store.");
         }
 
         return data;
@@ -80,7 +77,8 @@ public class DownloadingDataStore : IDataStore
         if (this.Hit(key))
         {
             this._hits.Remove(key, out _);
-            this._localDataStore.WriteToStoreFromStream(key, data);
+            if (!this._localDataStore.WriteToStoreFromStream(key, data))
+                throw new IOException($"Could not cache remote asset '{key}' in the primary data store.");
             data.Seek(0, SeekOrigin.Begin);
         }
 

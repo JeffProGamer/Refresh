@@ -52,8 +52,17 @@ public class RefreshGameServer : RefreshServer
         IDataStore? dataStore = null
     ) : base(listener)
     {
-        dataStore ??= new FileSystemDataStore();
+        // Select the primary store before composing archive caching, so uploads
+        // and cached archive assets use the same persistent backend.
+        if (dataStore == null)
+        {
+            ObjectStorageSettings storage = ObjectStorageSettings.FromEnvironment();
+            dataStore = storage.Enabled ? ObjectStorageDataStore.Create(storage) : new FileSystemDataStore();
+            this.Logger.LogInfo(BunkumCategory.Startup,
+                storage.Enabled ? "Primary asset storage: S3." : "Primary asset storage: local filesystem.");
+        }
         List<IDataStore> dataStores = [];
+        RemoteArchiveSettings remoteArchive = RemoteArchiveSettings.FromEnvironment();
 
         try
         {
@@ -69,6 +78,10 @@ public class RefreshGameServer : RefreshServer
         
         if (this._configStore.DryArchive.Enabled)
             dataStores.Add(new DownloadingDataStore(dataStore, new DryDataStore(this._configStore.DryArchive)));
+
+        if (remoteArchive.Enabled)
+            dataStores.Add(new DownloadingDataStore(dataStore,
+                new RemoteArchiveDataStore(remoteArchive.BaseUrl), hitsBeforeDownload: 1));
 
         databaseProvider ??= () => new GameDatabaseProvider(this.Logger, this._configStore.Database);
         
