@@ -270,9 +270,6 @@ private static bool VerifyTicket(RequestContext context, MemoryStream body, Tick
             signingKey = LbpSigningKey.Instance;
             break;
         case TokenPlatform.PS4:
-            if (!string.Equals(Environment.GetEnvironmentVariable("Auth__EnablePs4Support"), "true", StringComparison.OrdinalIgnoreCase))
-                return false;
-
             if (timeProvider.Now > ticket.ExpiryDate)
                 return false;
 
