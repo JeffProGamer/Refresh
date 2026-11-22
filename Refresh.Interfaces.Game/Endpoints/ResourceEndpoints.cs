@@ -110,6 +110,7 @@ public class ResourceEndpoints : EndpointGroup
     }
 
     [GameEndpoint("r/{hash}")]
+    [Authentication(false)]
     [EndpointRateLimit(EndpointBucketId.GameDownloadAsset)]
     public Response GetResource(RequestContext context, GameUser? user, Token? token, string hash, DataContext dataContext, ChallengeGhostRateLimitService ghostService)
     {
