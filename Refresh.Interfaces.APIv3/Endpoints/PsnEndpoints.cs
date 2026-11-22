@@ -1,4 +1,3 @@
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -14,9 +13,9 @@ public class PsnEndpoints : EndpointGroup
 {
     private static readonly HttpClient HttpClient = new();
 
-    // TODO: Replace with your ai-api.sh API key
-    // Get a free key at https://ai-api.sh/
-    private const string AiApiKey = "YOUR_AI_API_KEY_HERE";
+    // TODO: Add your ai-api.sh API key here if you want PSN username display
+    // Get a key at https://ai-api.sh/ (optional — sticker works without it)
+    private const string AiApiKey = "";
 
     [ApiV3Endpoint("psn-profile/{onlineId}")]
     [Authentication(false)]
@@ -28,7 +27,7 @@ public class PsnEndpoints : EndpointGroup
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://rest.ai-api.sh/v1/psn/profile/{onlineId}");
-            if (!string.Equals(AiApiKey, "YOUR_AI_API_KEY_HERE"))
+            if (!string.IsNullOrWhiteSpace(AiApiKey))
                 request.Headers.Add("X-API-Key", AiApiKey);
 
             HttpResponseMessage response = HttpClient.SendAsync(request).Result;

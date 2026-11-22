@@ -23,6 +23,18 @@ public class StickerEndpoints : EndpointGroup
         return new Response(data, ContentType.BinaryData);
     }
 
+    // Unauthenticated hash route so the PS4 can fetch lbpwn.ff by GUID without login
+    [GameEndpoint("r/c8a8d8eddcb9819ce1a318bdc4854900ce6a8280")]
+    [Authentication(false)]
+    public Response GetStickerScriptByHash(RequestContext context)
+    {
+        if (!File.Exists(StickerScriptPath))
+            return NotFound;
+
+        byte[] data = File.ReadAllBytes(StickerScriptPath);
+        return new Response(data, ContentType.BinaryData);
+    }
+
     [GameEndpoint("sticker-plan")]
     [Authentication(false)]
     public Response GetStickerPlan(RequestContext context)
