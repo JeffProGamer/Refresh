@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using Bunkum.Core;
@@ -84,6 +85,54 @@ public class StickerEndpoints : EndpointGroup
 
         // Log it server-side too
         context.Logger.LogWarning(BunkumCategory.Authentication, $"PS4 DEBUG DUMP:\n{sb}");
+
+        return new Response(Encoding.UTF8.GetBytes(sb.ToString()), ContentType.Plaintext);
+    }
+
+    // Sticker ping endpoint: PS4 sticker script calls this to verify connection works
+    [GameEndpoint("sticker-ping")]
+    [Authentication(false)]
+    [EndpointRateLimit(EndpointBucketId.GameDownloadAsset)]
+    public Response StickerPing(RequestContext context)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("=== STICKER PING ===");
+        sb.AppendLine($"Method: {context.Method}");
+        sb.AppendLine($"URL: {context.Url}");
+        sb.AppendLine($"Remote: {context.RemoteEndpoint}");
+        sb.AppendLine($"Time: {DateTimeOffset.UtcNow:O}");
+        sb.AppendLine();
+
+        sb.AppendLine("--- HEADERS ---");
+        foreach (string? key in context.RequestHeaders.AllKeys)
+            sb.AppendLine($"{key}: {context.RequestHeaders[key]}");
+        sb.AppendLine();
+
+        sb.AppendLine("--- COOKIES ---");
+        foreach (string? key in context.Cookies.AllKeys)
+            sb.AppendLine($"{key}={context.Cookies[key]}");
+        sb.AppendLine();
+
+        // Read the body
+        byte[]? body = null;
+        try
+        {
+            using var ms = new MemoryStream();
+            context.RequestStream.CopyTo(ms);
+            body = ms.ToArray();
+        }
+        catch { }
+
+        sb.AppendLine($"--- BODY ({body?.Length ?? 0} bytes) ---");
+        if (body != null && body.Length > 0)
+        {
+            sb.AppendLine($"Hex: {BitConverter.ToString(body).Replace("-", " ")}");
+            sb.AppendLine($"UTF8: {Encoding.UTF8.GetString(body)}");
+        }
+        sb.AppendLine();
+
+        // Log it server-side
+        context.Logger.LogWarning(BunkumCategory.Authentication, $"STICKER PING:\n{sb}");
 
         return new Response(Encoding.UTF8.GetBytes(sb.ToString()), ContentType.Plaintext);
     }
