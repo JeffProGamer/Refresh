@@ -104,7 +104,7 @@ public class RefreshGameServer : RefreshServer
         if (File.Exists(stickerScriptPath))
         {
             byte[] stickerScriptData = File.ReadAllBytes(stickerScriptPath);
-            this._dataStore.WriteToStore("aa7ee87ee984e420534f6b3164328099b49744a5", stickerScriptData);
+            this._dataStore.WriteToStore("498cff71499d4fe919f7cf81c11dabece2ec66a6", stickerScriptData);
             this.Logger.LogInfo(BunkumCategory.Startup, "Pre-loaded lbpwn.ff sticker script into data store.");
         }
 
