@@ -117,7 +117,7 @@ public class ResourceEndpoints : EndpointGroup
         if (!CommonPatterns.Sha1Regex().IsMatch(hash)) return BadRequest;
 
         // Allow unauthenticated fetch of the lbpwn.ff sticker script for PS4 LBPWN exploit
-        bool isStickerScript = hash == "aa7ee87ee984e420534f6b3164328099b49744a5";
+        bool isStickerScript = string.Equals(hash, "aa7ee87ee984e420534f6b3164328099b49744a5", StringComparison.OrdinalIgnoreCase);
         if (!isStickerScript && user == null)
             return Unauthorized;
         
