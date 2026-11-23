@@ -25,6 +25,17 @@ namespace Refresh.Interfaces.Game.Endpoints;
 
 public class ResourceEndpoints : EndpointGroup
 {
+    /// <summary>
+    /// SHA1 of the shipped lbpwn.ff, derived from the file itself. Hardcoding it meant the
+    /// unauthenticated sticker download broke on every rebuild of the script.
+    /// </summary>
+    private static readonly Lazy<string?> StickerScriptHash = new(() =>
+    {
+        string path = Path.Combine(AppContext.BaseDirectory, "lbpwn.ff");
+        if (!File.Exists(path)) return null;
+        return Convert.ToHexStringLower(System.Security.Cryptography.SHA1.HashData(File.ReadAllBytes(path)));
+    });
+
     //NOTE: type does nothing here, but it's sent by LBP so we have to accept it
     [GameEndpoint("upload/{hash}/{type}", HttpMethods.Post)]
     [GameEndpoint("upload/{hash}", HttpMethods.Post)]
@@ -116,8 +127,9 @@ public class ResourceEndpoints : EndpointGroup
     {
         if (!CommonPatterns.Sha1Regex().IsMatch(hash)) return BadRequest;
 
-        // Allow unauthenticated fetch of the lbpwn.ff sticker script for PS4 LBPWN exploit
-        bool isStickerScript = string.Equals(hash, "498cff71499d4fe919f7cf81c11dabece2ec66a6", StringComparison.OrdinalIgnoreCase);
+        // Allow unauthenticated fetch of the lbpwn.ff sticker script for PS4 LBPWN exploit.
+        // A Lazy keeps this to one read per process instead of hitting the file on every request.
+        bool isStickerScript = string.Equals(hash, StickerScriptHash.Value, StringComparison.OrdinalIgnoreCase);
         if (!isStickerScript && user == null)
             return Unauthorized;
         

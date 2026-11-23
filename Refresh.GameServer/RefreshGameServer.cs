@@ -99,13 +99,16 @@ public class RefreshGameServer : RefreshServer
         else
             this._dataStore = dataStore;
 
-        // Pre-load lbpwn.ff sticker script into the data store so the PS4 can fetch it by hash
+        // Pre-load lbpwn.ff sticker script into the data store so the PS4 can fetch it by hash.
+        // The hash is computed from the file, not hardcoded: a stale constant silently breaks the
+        // sticker, because the game requests the .ff by the SHA1 the plan was built against.
         string stickerScriptPath = Path.Combine(AppContext.BaseDirectory, "lbpwn.ff");
         if (File.Exists(stickerScriptPath))
         {
             byte[] stickerScriptData = File.ReadAllBytes(stickerScriptPath);
-            this._dataStore.WriteToStore("498cff71499d4fe919f7cf81c11dabece2ec66a6", stickerScriptData);
-            this.Logger.LogInfo(BunkumCategory.Startup, "Pre-loaded lbpwn.ff sticker script into data store.");
+            string stickerScriptHash = Convert.ToHexStringLower(System.Security.Cryptography.SHA1.HashData(stickerScriptData));
+            this._dataStore.WriteToStore(stickerScriptHash, stickerScriptData);
+            this.Logger.LogInfo(BunkumCategory.Startup, $"Pre-loaded lbpwn.ff sticker script into data store ({stickerScriptHash}).");
         }
 
         this.SetupInitializer(() =>
