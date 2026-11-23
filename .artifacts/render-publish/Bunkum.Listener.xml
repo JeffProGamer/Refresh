@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bunkum.Listener</name>
+    </assembly>
+    <members>
+        <member name="T:Bunkum.Listener.BunkumListener">
+            <summary>
+            A custom HTTP socket listener used by Bunkum's HTTP server.
+            This probably isn't what you're looking for. 
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.BunkumListener.Logger">
+            <summary>
+            The logger.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.BunkumListener.HeaderLineLimit">
+            <summary>
+            The maximum length a request header can have.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.BunkumListener.RequestLineMethodLimit">
+            <summary>
+            The maximum length the request line's method can have in bytes.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.BunkumListener.RequestLinePathLimit">
+            <summary>
+            The maximum length the request line's path can have in bytes.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.BunkumListener.RequestLineVersionLimit">
+            <summary>
+            The maximum length the request line's version can have in bytes.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.BunkumListener.#ctor(NotEnoughLogs.Logger)">
+            <summary>
+            Instantiates the listener, passing in the logger.
+            </summary>
+            <param name="logger">The logger to use for this listener.</param>
+        </member>
+        <member name="M:Bunkum.Listener.BunkumListener.StartListening">
+            <summary>
+            Tells the listener to start listening for requests. Called after startup tasks have completed.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.BunkumListener.WaitForConnectionAsync(System.Func{Bunkum.Listener.Request.ListenerContext,System.Threading.Tasks.Task},System.Nullable{System.Threading.CancellationToken})">
+            <summary>
+            Loop over <see cref="M:Bunkum.Listener.BunkumListener.WaitForConnectionAsyncInternal(System.Nullable{System.Threading.CancellationToken})"/> and wait for connections.
+            Handles errors cleanly, and calls back when a valid request comes through.
+            </summary>
+            <param name="action">The code to run when a valid request is made via this listener.</param>
+            <param name="globalCt">A cancellation token to allow for stopping listening.</param>
+        </member>
+        <member name="M:Bunkum.Listener.BunkumListener.WaitForConnectionAsyncInternal(System.Nullable{System.Threading.CancellationToken})">
+            <summary>
+            Listen for an individual request and parses it.
+            </summary>
+            <param name="globalCt">A cancellation token to allow for stopping listening.</param>
+            <returns>A valid <see cref="T:Bunkum.Listener.Request.ListenerContext"/> if the request is valid, null otherwise.</returns>
+        </member>
+        <member name="T:Bunkum.Listener.Protocol.ContentType">
+            <summary>
+            A set of MIME content-type.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Listener.Protocol.ProtocolInformation">
+            <summary>
+            A set of information that describes the protocol being used by a request.
+            </summary>
+            <remarks>
+            It is recommended to store this object statically somewhere and then reference it when generating the <see cref="T:Bunkum.Listener.Request.ListenerContext"/> if possible.
+            See <c>HttpProtocolInformation</c> of <c>Bunkum.Protocols.Http</c> for an example.
+            </remarks>
+        </member>
+        <member name="M:Bunkum.Listener.Protocol.ProtocolInformation.#ctor(System.String,System.String)">
+            <summary>
+            Instantiates a <see cref="T:Bunkum.Listener.Protocol.ProtocolInformation"/>.
+            </summary>
+            <param name="name">The friendly name of the protocol being used. For example, HTTP would simply be <c>HTTP</c>.</param>
+            <param name="version">The version of the protocol being used. For example, HTTP/1.1 would simply be <c>1.1</c>.</param>
+        </member>
+        <member name="F:Bunkum.Listener.Protocol.ProtocolInformation.Name">
+            <summary>
+            The friendly name of the protocol being used. For example, HTTP would simply be <c>HTTP</c>.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Protocol.ProtocolInformation.Version">
+            <summary>
+            The version of the protocol being used. For example, HTTP/1.1 would simply be <c>1.1</c>.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Listener.Request.ListenerContext">
+            <summary>
+            The listener's context for a request. Controls the request and its data.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.InputStream">
+            <summary>
+            The body of the request as a stream.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.Protocol">
+            <summary>
+            The protocol version the request is using.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.Method">
+            <summary>
+            The protocol method the request is using.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.Uri">
+            <summary>
+            The location/endpoint the client is going to.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.RequestHeaders">
+            <summary>
+            The request's headers
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.ResponseHeaders">
+            <summary>
+            The response's headers
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.Cookies">
+            <summary>
+            Cookies shared between the server and client
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.RealRemoteEndpoint">
+            <summary>
+            The actual endpoint this request originated from, ignoring BunkumConfig.UseForwardedIp.
+            In most cases you should use <see cref="F:Bunkum.Listener.Request.ListenerContext.RemoteEndpoint"/>.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.RemoteEndpoint">
+            <summary>
+            The endpoint this request originated from.
+            If BunkumConfig.UseForwardedIp is enabled, this will use the endpoint forwarded via the reverse proxy. 
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.RemoteCertificate">
+            <summary>
+            The certificate the client used to authenticate with the server
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.ContentLength">
+            <summary>
+            The length of the request body.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.HasBody">
+            <summary>
+            Whether or not the request has a body.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.CanSendData">
+            <summary>
+            Can we currently send data back to the client?
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.ResponseCode">
+            <summary>
+            The status code to respond with.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.ListenerContext.ResponseType">
+            <summary>
+            The type of content we are responding with.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.ListenerContext.ResponseStream">
+            <summary>
+            The response we are about to send.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.Write(System.String)">
+            <summary>
+            Writes a string to the response stream.
+            </summary>
+            <param name="str">The string to write.</param>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes a byte array to the response stream.
+            </summary>
+            <param name="buffer">The byte array to write.</param>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.FlushResponseAndClose">
+            <summary>
+            Finish up the response, and close the connection.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.SendResponse(System.Net.HttpStatusCode,System.Nullable{System.ArraySegment{System.Byte}})">
+            <summary>
+            Send our response headers, status code, and close the connection.  
+            </summary>
+            <param name="code"></param>
+            <param name="data"></param>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.CloseConnection">
+            <summary>
+            Closes the connection we made. Called after a request has been processed, and after the response has been sent.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.Request.ListenerContext.SendBuffer(System.ArraySegment{System.Byte})">
+            <summary>
+            Sends data directly to the client.
+            </summary>
+            <param name="buffer">The data to send.</param>
+        </member>
+        <member name="T:Bunkum.Listener.Request.SocketListenerContext">
+            <summary>
+            A <see cref="T:Bunkum.Listener.Request.ListenerContext"/> with <see cref="T:System.Net.Sockets.Socket"/> support.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Listener.Request.SocketListenerContext.Stream">
+            <summary>
+            The stream associated with this SocketListenerContext
+            </summary>
+        </member>
+        <member name="P:Bunkum.Listener.Request.SocketListenerContext.SocketClosed">
+            <summary>
+            Whether or not the socket has been closed
+            </summary>
+        </member>
+        <member name="M:Bunkum.Listener.Request.SocketListenerContext.#ctor(System.Net.Sockets.Socket,System.IO.Stream)">
+            <summary>
+            Initializes the <see cref="T:Bunkum.Listener.Request.ListenerContext"/> with socket support.
+            </summary>
+            <param name="socket">The socket to use for this context.</param>
+        </member>
+        <member name="P:Bunkum.Listener.Request.SocketListenerContext.CanSendData">
+            <inheritdoc/>
+        </member>
+        <member name="M:Bunkum.Listener.Request.SocketListenerContext.CloseConnection">
+            <inheritdoc/>
+        </member>
+        <member name="M:Bunkum.Listener.Request.SocketListenerContext.SendBuffer(System.ArraySegment{System.Byte})">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

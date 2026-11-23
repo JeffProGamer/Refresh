@@ -1,0 +1,636 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bunkum.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Bunkum.Core.BunkumConsole">
+            <summary>
+            Helper class for dealing with the console.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Core.BunkumConsole.WillConsoleBeDestroyed">
+            <summary>
+            Determines if the console will be destroyed after execution.
+            https://devblogs.microsoft.com/oldnewthing/20160125-00/?p=92922
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.BunkumConsole.WaitForInputAndExit(System.Int32)">
+            <summary>
+            If a console was allocated, wait for a key to be pressed and then exit.
+            This solves that "flashing" problem where if a console application is double-clicked,
+            it flashes startup errors leaving no chance for the user to read them.
+            </summary>
+            <param name="code">The exit code</param>
+        </member>
+        <member name="T:Bunkum.Core.BunkumParameterInfo">
+            <summary>
+            A parameter used for injection information.
+            </summary>
+            <seealso cref="T:System.Reflection.ParameterInfo"/>
+        </member>
+        <member name="M:Bunkum.Core.BunkumParameterInfo.#ctor(System.Type,System.String)">
+            <summary>
+            Instantiates a set of parameter info.
+            </summary>
+            <param name="parameterType">The parameter's type.</param>
+            <param name="name">The parameter's name.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumParameterInfo.#ctor(System.Reflection.ParameterInfo)">
+            <summary>
+            Instantiates a set of parameter info from existing reflection data.
+            </summary>
+            <param name="parameter">The reflection data to use.</param>
+        </member>
+        <member name="P:Bunkum.Core.BunkumParameterInfo.ParameterType">
+            <summary>
+            The type of the parameter.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.BunkumParameterInfo.Name">
+            <summary>
+            The name of the parameter.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.BunkumServer">
+            <summary>
+            The main class representing a Bunkum HTTP server and its configuration.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Core.BunkumServer.BunkumConfig">
+            <summary>
+            The BunkumConfig in use by this server
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.CreateConfig(System.String)">
+            <summary>
+            Creates a BunkumConfig
+            </summary>
+            <param name="filename">The filename to load</param>
+            <returns>The loaded config</returns>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.#ctor(Bunkum.Listener.BunkumListener,NotEnoughLogs.LoggerConfiguration,System.Collections.Generic.List{NotEnoughLogs.Sinks.ILoggerSink})">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.Start(System.Nullable{System.Int32})">
+            <summary>
+            Start the server in multithreaded mode. Caller is responsible for blocking.
+            </summary>
+            <param name="taskOverride">Override the number of tasks spun up.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.StartAndBlockAsync">
+            <summary>
+            Start the server in single-threaded mode. Bunkum is responsible for blocking.
+            Deprecated and will be removed in 5.0.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.Stop">
+            <summary>
+            Attempts to stop all block tasks, including those managed by the caller.
+            If you are creating a server that does not span across the entire lifetime of the application, you are responsible for calling this to stop the server.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.BunkumServer.Initialize">
+            <summary>
+            The initialization function for the server. Called after startup and after hot reload.
+            You do not need to clear Bunkum's state during a hot reload - Bunkum will wipe everything for you. 
+            </summary>
+            <exception cref="T:System.InvalidOperationException">An initializer has already been declared, or the value is null.</exception>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddEndpointGroup(System.Type)">
+            <summary>
+            Manually add a group of endpoints.
+            </summary>
+            <param name="type">The type containing the endpoints to be used.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddEndpointGroup``1">
+            <summary>
+            Manually add a group of endpoints.
+            </summary>
+            <typeparam name="TDoc">The type containing the endpoints to be used.</typeparam>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.DiscoverEndpointsFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Discover all <see cref="T:Bunkum.Core.Endpoints.EndpointGroup"/>s from an assembly and add them into Bunkum. 
+            </summary>
+            <param name="assembly">The assembly to scan from.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.UseDatabaseProvider(Bunkum.Core.Database.IDatabaseProvider{Bunkum.Core.Database.IDatabaseContext})">
+            <summary>
+            Define a database provider to be used. Once added, it can then be passed into Endpoints.
+            </summary>
+            <param name="provider">The provider to use.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddConfig(Bunkum.Core.Configuration.Config)">
+            <summary>
+            Adds a <see cref="T:Bunkum.Core.Configuration.Config"/> to Bunkum's internal list of configurations. These can then be passed into Endpoints or Services.
+            </summary>
+            <param name="config">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.UseConfig(Bunkum.Core.Configuration.Config)">
+            <summary>
+            Adds a <see cref="T:Bunkum.Core.Configuration.Config"/> to Bunkum's internal list of configurations. These can then be passed into Endpoints or Services.
+            </summary>
+            <param name="config">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddConfigFromJsonFile``1(System.String)">
+            <summary>
+            Load a <see cref="T:Bunkum.Core.Configuration.Config"/> from a .json file and add it into Bunkum's internal list of configurations, which can then be passed into Endpoints or Services.
+            </summary>
+            <param name="filename">What the config's filename should be stored as</param>
+            <typeparam name="TConfig">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</typeparam>
+            <seealso cref="M:Bunkum.Core.Configuration.Config.LoadFromJsonFile``1(System.String,NotEnoughLogs.Logger)"/>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.UseJsonConfig``1(System.String)">
+            <summary>
+            Load a <see cref="T:Bunkum.Core.Configuration.Config"/> from a .json file and add it into Bunkum's internal list of configurations, which can then be passed into Endpoints or Services.
+            </summary>
+            <param name="filename">What the config's filename should be stored as</param>
+            <typeparam name="TConfig">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</typeparam>
+            <seealso cref="M:Bunkum.Core.Configuration.Config.LoadFromJsonFile``1(System.String,NotEnoughLogs.Logger)"/>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.UseListener(Bunkum.Listener.BunkumListener)">
+            <summary>
+            Set the listener this BunkumServer uses. Will default to CreateDefaultListener if not called.
+            </summary>
+            <param name="listener">The listener to use</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddSerializer(Bunkum.Core.Responses.IBunkumSerializer)">
+            <summary>
+            Registers a <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> that will be used for a set of Content Types when creating a Response's data.
+            </summary>
+            <param name="serializer">The serializer to use</param>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.AddSerializer``1">
+            <summary>
+            Registers a <see cref="!:TBunkumSerializer"/> that will be used for its set of Content Types when creating a Response's data.
+            </summary>
+            <typeparam name="TBunkumSerializer">The type of <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> to create.</typeparam>
+        </member>
+        <member name="M:Bunkum.Core.BunkumServer.RemoveSerializer``1">
+            <summary>
+            Removes and unregisters all <see cref="!:TBunkumSerializer"/>s. 
+            </summary>
+            <typeparam name="TBunkumSerializer">The type of <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> to remove.</typeparam>
+            <returns>The number of serializers removed.</returns>
+        </member>
+        <member name="T:Bunkum.Core.Configuration.BunkumConfig">
+            <summary>
+            Bunkum's configuration file. Contains common settings.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Configuration.Config">
+            <summary>
+            A custom configuration file for a Bunkum server.
+            If you're looking for Bunkum's base configuration, see <see cref="T:Bunkum.Core.Configuration.BunkumConfig"/>.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.Configuration.Config.CurrentConfigVersion">
+            <summary>
+            A number representing the schema version of your configuration. Start at 1, then change it when you make a change to your config class.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.Configuration.Config.Version">
+            <summary>
+            The configuration's current schema version. Do not touch this - you do not need to.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Configuration.Config.Migrate(System.Int32,System.Object)">
+            <summary>
+            Migrate a configuration. Called when the config is loaded and the current version is newer than the one in the configuration.
+            </summary>
+            <param name="oldVer">The version of the configuration we are migrating.</param>
+            <param name="oldConfig">The configuration we are migrating, stored as dynamic.</param>
+        </member>
+        <member name="M:Bunkum.Core.Configuration.Config.LoadFromFile``1(System.String,NotEnoughLogs.Logger)">
+            <summary>
+            Loads or creates a configuration from a .json file on disk.
+            </summary>
+            <param name="filename">What the config's filename should be stored as</param>
+            <param name="logger">An instance of the logger, used for debugging</param>
+            <typeparam name="TConfig">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</typeparam>
+            <returns>The configuration, either freshly created or previously existing.</returns>
+            <exception cref="T:System.ArgumentNullException">The file could not be found or created.</exception>
+        </member>
+        <member name="M:Bunkum.Core.Configuration.Config.LoadFromJsonFile``1(System.String,NotEnoughLogs.Logger)">
+            <summary>
+            Loads or creates a configuration from a .json file on disk.
+            </summary>
+            <param name="filename">What the config's filename should be stored as</param>
+            <param name="logger">An instance of the logger, used for debugging</param>
+            <typeparam name="TConfig">An object extending <see cref="T:Bunkum.Core.Configuration.Config"/> that represents your server's configuration.</typeparam>
+            <returns>The configuration, either freshly created or previously existing.</returns>
+            <exception cref="T:System.ArgumentNullException">The file could not be found or created.</exception>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.AllowEmptyBodyAttribute">
+            <summary>
+            Allows the endpoint to receive null as a body instead of clients being sent BadRequest.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.AuthenticationAttribute">
+            <summary>
+            Is authentication required for this endpoint?
+            If true, clients will receive 403 if your <see cref="T:Bunkum.Core.Authentication.IAuthenticationProvider`1"/> does not return a user.
+            If false, endpoints will work as normal.
+            <br/>
+            Default depends on the value set for <see cref="!:BunkumServer.AssumeAuthenticationRequired"/>.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.ClientCacheResponseAttribute">
+            <summary>
+            Indicates that the client should cache the response for the given length.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Endpoints.ClientCacheResponseAttribute.#ctor(System.Boolean)">
+            <summary>
+            Indicates that the client should cache the response for 1 day.
+            </summary>
+            <param name="onlyCacheSuccess">
+            If true, only send the cache hint when the response is a 2XX status code.
+            If false, always send the cache hint.
+            </param>
+        </member>
+        <member name="M:Bunkum.Core.Endpoints.ClientCacheResponseAttribute.#ctor(System.Int64,System.Boolean)">
+            <summary>
+            Indicates that the client should cache the response for the given length.
+            </summary>
+            <param name="seconds">The number of seconds that the client should keep the response cached for</param>
+            <param name="onlyCacheSuccess">
+            If true, only send the cache hint when the response is a 2XX status code.
+            If false, always send the cache hint.
+            </param>
+        </member>
+        <member name="M:Bunkum.Core.Endpoints.ClientCacheResponseAttribute.#ctor(System.TimeSpan,System.Boolean)">
+            <summary>
+            Indicates that the client should cache the response for the given length.
+            </summary>
+            <param name="span">The time span that the client should keep the response cached for</param>
+            <param name="onlyCacheSuccess">
+            If true, only send the cache hint when the response is a 2XX status code.
+            If false, always send the cache hint.
+            </param>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.Debugging.DebugRequestBodyAttribute">
+            <summary>
+            Tells Bunkum to log request bodies for this <see cref="T:Bunkum.Core.Endpoints.EndpointAttribute">Endpoint</see>. Useful for debugging.
+            </summary>
+            <remarks>
+            Requires the <see cref="T:Bunkum.Core.Services.DebugService"/> to be added to the <see cref="T:Bunkum.Core.BunkumServer"/> via the <see cref="M:Bunkum.Core.BunkumServer.AddMiddleware``1"/> function.
+            </remarks>
+            <seealso cref="T:Bunkum.Core.Services.DebugService"/>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.Debugging.DebugResponseBodyAttribute">
+            <summary>
+            Tells Bunkum to log response bodies for this <see cref="T:Bunkum.Core.Endpoints.EndpointAttribute">Endpoint</see>. Useful for debugging.
+            </summary>
+            <remarks>
+            Requires the <see cref="T:Bunkum.Core.Services.DebugService"/> to be added to the <see cref="T:Bunkum.Core.BunkumServer"/> via the <see cref="M:Bunkum.Core.BunkumServer.AddMiddleware``1"/> function.
+            </remarks>
+            <seealso cref="T:Bunkum.Core.Services.DebugService"/>
+        </member>
+        <member name="P:Bunkum.Core.Endpoints.EndpointAttribute.Protocol">
+            <summary>
+            The protocol this endpoint type is meant for.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.NullStatusCodeAttribute">
+            <summary>
+            When returning null as a response, the default is 404 NotFound.
+            You can use this attribute to replace that endpoint's default status code when the response is null.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Endpoints.SuccessStatusCodeAttribute">
+            <summary>
+            When returning an object as a response, the default is 200 OK.
+            You can use this attribute to replace that endpoint's default status code.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.RateLimit.IRateLimitUser">
+            <summary>
+            Exposes methods to Bunkum that allow the rate limiting system to operate on users.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.RateLimit.IRateLimitUser.RateLimitUserIdIsEqual(System.Object)">
+            <param name="obj">The object to check against.</param>
+            <returns>True if the object is equal to this user's id, false otherwise.</returns>
+        </member>
+        <member name="M:Bunkum.Core.RateLimit.RateLimitSettings.#ctor(System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Defines settings to be used by the <see cref="T:Bunkum.Core.RateLimit.RateLimiter"/>.
+            </summary>
+            <param name="requestTimeoutDuration">How long should it take a request to stop counting towards the rate limit?</param>
+            <param name="maxRequestAmount">How many requests until the rate limit is triggered?</param>
+            <param name="requestBlockDuration">How long should the user be blocked when the rate limit is triggered?</param>
+        </member>
+        <member name="F:Bunkum.Core.RateLimit.RateLimitSettings.RequestTimeoutDuration">
+            <summary>
+            How long should it take a request to stop counting towards the rate limit?
+            </summary>
+        </member>
+        <member name="F:Bunkum.Core.RateLimit.RateLimitSettings.MaxRequestAmount">
+            <summary>
+            How many requests until the rate limit is triggered?
+            </summary>
+        </member>
+        <member name="F:Bunkum.Core.RateLimit.RateLimitSettings.RequestBlockDuration">
+            <summary>
+            How long should the user be blocked when the rate limit is triggered?
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.RateLimit.RateLimitSettingsAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Defines settings to be used by the <see cref="T:Bunkum.Core.RateLimit.RateLimiter"/> for this endpoint.
+            </summary>
+            <param name="requestTimeoutDuration">How long should it take a request to stop counting towards the rate limit?</param>
+            <param name="maxRequestAmount">How many requests until the rate limit is triggered?</param>
+            <param name="requestBlockDuration">How long should the user be blocked when the rate limit is triggered?</param>
+        </member>
+        <member name="P:Bunkum.Core.RequestContext.RemoteCertificate">
+            <summary>
+            The certificate the client used to authenticate with the server
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Responses.IBunkumSerializer">
+            <summary>
+            Defines a serializer for a set of content types.
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.Responses.IBunkumSerializer.ContentTypes">
+            <summary>
+            The list of content types to be handled with this <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> 
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Responses.IHasResponseCode">
+            <summary>
+            Used to indicate that a data object contains a code to include in the response.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Responses.Serialization.BunkumJsonSerializer">
+            <summary>
+            An <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> that implements serialization for <c>Newtonsoft.JSON</c>-based types
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.Responses.Serialization.BunkumJsonSerializer.ContentTypes">
+            <inherit-doc/>
+        </member>
+        <member name="M:Bunkum.Core.Responses.Serialization.BunkumJsonSerializer.Serialize(System.Object)">
+            <inherit-doc/>
+        </member>
+        <member name="T:Bunkum.Core.Responses.Serialization.BunkumXmlSerializer">
+            <summary>
+            An <see cref="T:Bunkum.Core.Responses.IBunkumSerializer"/> that implements serialization for <c>System.Xml.Serialization</c>-based types
+            </summary>
+        </member>
+        <member name="P:Bunkum.Core.Responses.Serialization.BunkumXmlSerializer.ContentTypes">
+            <inherit-doc/>
+        </member>
+        <member name="M:Bunkum.Core.Responses.Serialization.BunkumXmlSerializer.Serialize(System.Object)">
+            <inherit-doc/>
+        </member>
+        <member name="T:Bunkum.Core.Responses.Serialization.BunkumXmlTextWriter">
+            <summary>
+            A custom XML text writer that strips namespaces and attributes from elements.
+            </summary>
+        </member>
+        <member name="F:Bunkum.Core.Services.AuthenticationService._assumeAuthenticationRequired">
+            <summary>
+            Is authentication required for your endpoints?
+            If true, clients will receive 403 if your <see cref="T:Bunkum.Core.Authentication.IAuthenticationProvider`1"/> does not return a user.
+            If false, endpoints will work as normal.
+            </summary>
+            <seealso cref="T:Bunkum.Core.Authentication.IAuthenticationProvider`1"/>
+            <seealso cref="T:Bunkum.Core.Endpoints.AuthenticationAttribute"/>
+        </member>
+        <member name="M:Bunkum.Core.Services.AuthenticationService.OnRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Services.AuthenticationService.AddParameterToEndpoint(Bunkum.Listener.Request.ListenerContext,Bunkum.Core.BunkumParameterInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Services.AuthenticationService.AfterRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Nullable{Bunkum.Core.Responses.Response},System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Services.AuthenticationService.RemoveTokenFromCache">
+            <summary>
+            Removes the token from the cache. Must be called when returning responses from a consumer of this service.
+            </summary>
+        </member>
+        <member name="T:Bunkum.Core.Services.DebugService">
+            <summary>
+            Enables request logging and other debug features in Bunkum.
+            </summary>
+            <seealso cref="T:Bunkum.Core.Endpoints.Debugging.DebugRequestBodyAttribute"/>
+            <seealso cref="T:Bunkum.Core.Endpoints.Debugging.DebugResponseBodyAttribute"/>
+        </member>
+        <member name="M:Bunkum.Core.Services.DebugService.OnRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc/>
+        </member>
+        <member name="M:Bunkum.Core.Services.DebugService.AfterRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Nullable{Bunkum.Core.Responses.Response},System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc/>
+        </member>
+        <member name="T:Bunkum.Core.Services.EndpointService">
+            <summary>
+            A type of service that can expose itself as a parameter to endpoints.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Services.EndpointService.AddParameterToEndpoint(Bunkum.Listener.Request.ListenerContext,Bunkum.Core.BunkumParameterInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc/>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.Initialize">
+            <summary>
+            Runs when startup tasks are run.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.OnRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <summary>
+            Runs when the request is about to be handled by the main middleware.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.AfterRequestHandled(Bunkum.Listener.Request.ListenerContext,System.Nullable{Bunkum.Core.Responses.Response},System.Reflection.MethodInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <summary>
+            Runs after the request has been handled by the main middleware.
+            May also be called when a response fails to generate due to an exception. A null response is passed in this case.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.AddParameterToEndpoint(Bunkum.Listener.Request.ListenerContext,System.Reflection.ParameterInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <summary>
+            Called when the endpoint is looking for a custom parameter. You can provide one using this method.
+            </summary>
+            <param name="context">The context of the request.</param>
+            <param name="parameter">Information about the parameter being processed.</param>
+            <param name="database">The database.</param>
+            <returns>Null if this service has no suitable object for this parameter, otherwise the object to add.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.AddParameterToEndpoint(Bunkum.Listener.Request.ListenerContext,Bunkum.Core.BunkumParameterInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <summary>
+            Called when the endpoint is looking for a custom parameter. You can provide one using this method.
+            </summary>
+            <param name="context">The context of the request.</param>
+            <param name="parameter">Information about the parameter being processed.</param>
+            <param name="database">The database.</param>
+            <returns>Null if this service has no suitable object for this parameter, otherwise the object to add.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.ParameterBasedFrom``1(Bunkum.Core.BunkumParameterInfo)">
+            <summary>
+            Checks if the parameter is assignable to a type.
+            </summary>
+            <param name="paramInfo">The parameter in question.</param>
+            <typeparam name="TExtendable">The type, usually an interface or abstract class.</typeparam>
+            <returns>true if the parameter's type extends the other type; false if not.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Services.Service.ParameterEqualTo``1(Bunkum.Core.BunkumParameterInfo)">
+            <summary>
+            Checks if the parameter is equal to the type.
+            </summary>
+            <param name="paramInfo">The parameter in question.</param>
+            <typeparam name="TOther">The type to check against.</typeparam>
+            <returns>true if the parameter's type is equal to the other type; false if not.</returns>
+        </member>
+        <member name="T:Bunkum.Core.Storage.FileSystemDataStore">
+            <summary>
+            A <see cref="T:Bunkum.Core.Storage.IDataStore"/> that operates on the file system.
+            </summary>
+            <remarks>
+            This data store tries to protect against path traversal by default. You can disable this with a boolean in the constructor.
+            </remarks>
+            <seealso cref="T:Bunkum.Core.BunkumFileSystem"/>
+        </member>
+        <member name="P:Bunkum.Core.Storage.FileSystemDataStore.EnableTraversalSafety">
+            <summary>
+            Whether or not to protect against path traversal.
+            These protections are enabled by default, but this can be disabled for (minuscule) performance improvements.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.#ctor">
+            <summary>
+            Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
+            </summary>
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.#ctor(System.Boolean)">
+            <summary>
+            Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
+            </summary>
+            <param name="enableTraversalSafety">Whether or not to protect against path traversal.</param>
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.ExistsInStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.WriteToStore(System.String,System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.GetDataFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.RemoveFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.GetKeysFromStore">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.WriteToStoreFromStream(System.String,System.IO.Stream)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.OpenWriteStream(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.FileSystemDataStore.GetStreamFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.ExistsInStore(System.String)">
+            <summary>
+            Checks if the key exists in the data store.
+            </summary>
+            <param name="key">The key to be checked.</param>
+            <returns>true when the key is stored in the data store, false if it does not exist.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.WriteToStore(System.String,System.Byte[])">
+            <summary>
+            Writes the given byte array to the data store.
+            </summary>
+            <param name="key">The key to be written to.</param>
+            <param name="data">The data to be written.</param>
+            <returns>true if the write operation was successful, false if not.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.WriteToStore(System.String,System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes the given span to the data store.
+            </summary>
+            <param name="key">The key to be written to.</param>
+            <param name="data">The data to be written.</param>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.GetDataFromStore(System.String)">
+            <summary>
+            Retrieves a byte array from the data store using a key. 
+            </summary>
+            <param name="key">The key to be read from.</param>
+            <returns>The data from the data store.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.RemoveFromStore(System.String)">
+            <summary>
+            Removes a key and its data from the data store.
+            </summary>
+            <param name="key">The key to remove.</param>
+            <returns>true if the removal was successful, false if not.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.GetKeysFromStore">
+            <summary>
+            Gets a list of all keys from the data store.
+            </summary>
+            <returns>A string array containing every key in the store.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.WriteToStoreFromStream(System.String,System.IO.Stream)">
+            <summary>
+            Writes the given Stream to the data store.
+            </summary>
+            <param name="key">The key to be written to.</param>
+            <param name="data">The data to be written.</param>
+            <returns>true if the write operation was successful, false if not.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.GetStreamFromStore(System.String)">
+            <summary>
+            Retrieves a Stream from the data store using a key. You are responsible for closing this stream. 
+            </summary>
+            <param name="key">The key to be read from.</param>
+            <returns>The data from the data store.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.OpenWriteStream(System.String)">
+            <summary>
+            Opens a Stream from the data store using a key. You are responsible for closing this stream. 
+            </summary>
+            <param name="key">The key to write to.</param>
+            <returns>A stream in the data store from the key.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.IDataStore.TryGetDataFromStore(System.String,System.Byte[]@)">
+            <summary>
+            Attempts to retrieve data from the data store.
+            </summary>
+            <param name="key">The key to be read from.</param>
+            <param name="data">The data from the data store. If null, the read operation was unsuccessful.</param>
+            <returns>true if the data was read, false if not.</returns>
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.ExistsInStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.RemoveFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.GetKeysFromStore">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.WriteToStore(System.String,System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.GetDataFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.WriteToStoreFromStream(System.String,System.IO.Stream)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.GetStreamFromStore(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Bunkum.Core.Storage.InMemoryDataStore.OpenWriteStream(System.String)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

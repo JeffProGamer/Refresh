@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bunkum.AutoDiscover</name>
+    </assembly>
+    <members>
+        <member name="T:Bunkum.AutoDiscover.AutoDiscoverConfig">
+            <summary>
+            A configuration for AutoDiscover
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.ServerBrand">
+            <summary>
+            A friendly name of the server.
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.ServerDescription">
+            <summary>
+            An optional friendly description of the server.
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.BaseEndpoint">
+            <summary>
+            The default endpoint to patch clients to.
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.UrlDelegate">
+            <summary>
+            A method that determines the endpoint to patch clients to.
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.BannerImageUrl">
+            <summary>
+            An optional URL to the image that the client may retrieve.
+            </summary>
+        </member>
+        <member name="F:Bunkum.AutoDiscover.AutoDiscoverConfig.UsesCustomDigestKey">
+            <summary>
+            An optional boolean, when true it represents that the LBP server will only accept the digest key CustomServerDigest.
+            </summary>
+        </member>
+        <member name="M:Bunkum.AutoDiscover.AutoDiscoverConfig.#ctor(System.String,System.String,System.Boolean,System.String,System.String)">
+            <summary>
+            Instantiates an AutoDiscoverConfig.
+            </summary>
+        </member>
+        <member name="M:Bunkum.AutoDiscover.AutoDiscoverConfig.#ctor(System.String,Bunkum.AutoDiscover.AutoDiscoverDelegate,System.Boolean,System.String,System.String)">
+            <summary>
+            Instantiates an AutoDiscoverConfig.
+            </summary>
+        </member>
+        <member name="T:Bunkum.AutoDiscover.AutoDiscoverDelegate">
+            <summary>
+            The function to use to determine the URL.
+            </summary>
+            <param name="game">
+            The TitleID or identifier of the game to be patched.
+            </param>
+        </member>
+        <member name="T:Bunkum.AutoDiscover.AutoDiscoverService">
+            <summary>
+            An implementation of AutoDiscover for Bunkum.
+            See documentation here on this API here: https://docs.littlebigrefresh.com/autodiscover-api
+            </summary>
+        </member>
+        <member name="M:Bunkum.AutoDiscover.AutoDiscoverService.AddParameterToEndpoint(Bunkum.Listener.Request.ListenerContext,Bunkum.Core.BunkumParameterInfo,System.Lazy{Bunkum.Core.Database.IDatabaseContext})">
+            <inheritdoc/>
+        </member>
+        <member name="T:Bunkum.AutoDiscover.Extensions.BunkumServerExtensions">
+            <summary>
+            Extension class that facilitates injection of this library's services.
+            </summary>
+        </member>
+        <member name="M:Bunkum.AutoDiscover.Extensions.BunkumServerExtensions.AddAutoDiscover(Bunkum.Core.BunkumServer,System.String,System.String,System.Boolean,System.String,System.String)">
+            <summary>
+            Adds the AutoDiscover service to the server.
+            </summary>
+            <param name="server">The server to inject to.</param>
+            <param name="serverBrand">A friendly name of the server. You can put anything you like here.</param>
+            <param name="baseEndpoint">The base url that should be recommended to the client.</param>
+            <param name="usesCustomDigestKey">
+            A boolean, when true it represents that the LBP server will only accept the digest key <c>CustomServerDigest</c>.
+            Otherwise, the server is using the default digest key.
+            </param>
+            <param name="serverDescription">An optional friendly description of the server. You can put anything you like here.</param>
+            <param name="bannerImageUrl">
+            An optional image that the client may retrieve.
+            You can put any URL here as long as the link points to an image, however PNG is recommended.
+            </param>
+        </member>
+        <member name="M:Bunkum.AutoDiscover.Extensions.BunkumServerExtensions.AddAutoDiscover(Bunkum.Core.BunkumServer,System.String,Bunkum.AutoDiscover.AutoDiscoverDelegate,System.Boolean,System.String,System.String)">
+            <summary>
+            Adds the AutoDiscover service to the server.
+            </summary>
+            <param name="server">The server to inject to.</param>
+            <param name="serverBrand">A friendly name of the server. You can put anything you like here.</param>
+            <param name="urlDelegate">The method that determines the endpoint to patch clients to.</param>
+            <param name="usesCustomDigestKey">
+            A boolean, when true it represents that the LBP server will only accept the digest key <c>CustomServerDigest</c>.
+            Otherwise, the server is using the default digest key.
+            </param>
+            <param name="serverDescription">An optional friendly description of the server. You can put anything you like here.</param>
+            <param name="bannerImageUrl">
+            An optional image that the client may retrieve.
+            You can put any URL here as long as the link points to an image, however PNG is recommended.
+            </param>
+        </member>
+    </members>
+</doc>
